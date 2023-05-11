@@ -1,0 +1,110 @@
+release:
+  prerelease: auto
+  draft: false
+
+env:
+  # required to support multi architecture docker builds
+  - DOCKER_CLI_EXPERIMENTAL=enabled
+  - CGO_ENABLED=0
+
+builds:
+  - id: linux-build
+    dir: ./
+    binary: openshift4_mirror
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    # set the modified timestamp on the output binary to the git timestamp to ensure a reproducible build
+    mod_timestamp: &build-timestamp '{{ .CommitTimestamp }}'
+    ldflags: &build-ldflags |
+      -w
+      -s
+      -extldflags '-static'
+
+  - id: darwin-build
+    dir: ./
+    binary: openshift4_mirror
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: *build-timestamp
+    ldflags: *build-ldflags
+
+  - id: windows-build
+    dir: ./
+    binary: openshift4_build
+    goos:
+      - windows
+    goarch:
+      - amd64
+    mod_timestamp: *build-timestamp
+    ldflags: *build-ldflags
+
+archives:
+  - id: linux-archives
+    builds:
+      - linux-build
+
+  # note: the signing process is depending on tar.gz archives. If this format changes then .github/scripts/apple-signing/*.sh will need to be adjusted
+  - id: darwin-archives
+    builds:
+      - darwin-build
+
+  - id: windows-archives
+    format: zip
+    builds:
+      - windows-build
+
+dockers:
+  - image_templates:
+      # - shanedell/openshift4-mirror-go:latest
+      # - shanedell/openshift4-mirror-go:{{.Tag}}
+      - ghcr.io/shanedell/openshift4-mirror-go:latest
+      - ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}
+    goarch: amd64
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--build-arg=BUILD_DATE={{.Date}}"
+      - "--build-arg=BUILD_VERSION={{.Version}}"
+      - "--build-arg=VCS_REF={{.FullCommit}}"
+      - "--build-arg=VCS_URL={{.GitURL}}"
+
+  - image_templates:
+      # - shanedell/openshift4-mirror-go:{{.Tag}}-arm64
+      - ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}-arm64
+    goarch: arm64
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+      - "--build-arg=BUILD_DATE={{.Date}}"
+      - "--build-arg=BUILD_VERSION={{.Version}}"
+      - "--build-arg=VCS_REF={{.FullCommit}}"
+      - "--build-arg=VCS_URL={{.GitURL}}"
+
+docker_manifests:
+  # - name_template: shanedell/openshift4-mirror-go:latest
+  #   image_templates:
+  #     - shanedell/openshift4-mirror-go:{{.Tag}}
+  #     - shanedell/openshift4-mirror-go:{{.Tag}}-arm64
+
+  # - name_template: shanedell/openshift4-mirror-go:{{.Tag}}
+  #   image_templates:
+  #     - shanedell/openshift4-mirror-go:{{.Tag}}
+  #     - shanedell/openshift4-mirror-go:{{.Tag}}-arm64
+
+  - name_template: ghcr.io/shanedell/openshift4-mirror-go:latest
+    image_templates:
+      - ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}
+      - ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}-arm64
+
+  - name_template: ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}
+    image_templates:
+      - ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}
+      - ghcr.io/shanedell/openshift4-mirror-go:{{.Tag}}-arm64

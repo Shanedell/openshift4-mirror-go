@@ -1,0 +1,72 @@
+name: "Release"
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  GO_VERSION: "1.18.x"
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check lint
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: lint
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # This check name is defined as the github action job name (in .github/workflows/testing.yaml)
+          checkName: "Lint"
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Quality gate
+        if: steps.lint.outputs.conclusion != 'success'
+        run: |
+          echo "Lint Status: ${{ steps.lint.conclusion }}"
+          false
+
+  release:
+    needs: [quality-gate]
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install needed tools
+        shell: bash
+        run: make bootstrap
+
+      # - name: Login to Docker Hub
+      #   uses: docker/login-action@v2
+      #   with:
+      #     username: ${{ secrets.DOCKER_USER }}
+      #     password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & publish release artifacts
+        run: make ci-release
+        env:
+          # for creating the release (requires write access to packages and content)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: dist/**/*
