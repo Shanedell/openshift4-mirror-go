@@ -10,7 +10,7 @@ import (
 	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
 )
 
-func mirrorCatalogs(outputDir string, catalog string) error {
+func mirrorCatalogManifests(outputDir string, catalog string) error {
 	cmd := utils.CreateCommand(
 		filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath),
 		"adm",
@@ -27,18 +27,20 @@ func mirrorCatalogs(outputDir string, catalog string) error {
 	return cmd.Run()
 }
 
-func mirrorImages(outputDir string, mappingLocalFilePath string) error {
+func mirrorCatalogs(outputDir string, catalog string) error {
 	cmd := utils.CreateCommand(
 		filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath),
-		"image",
+		"adm",
+		"catalog",
 		"mirror",
 		"--registry-config", filepath.Join(utils.BundleDir, "pull-secret.json"),
-		"--dir", outputDir,
-		"--filter-by-os", "linux/amd64",
+		"--index-filter-by-os", "linux/amd64",
 		"--continue-on-error=true",
-		"--filename", mappingLocalFilePath,
+		utils.CatalogIndexes[catalog],
+		fmt.Sprintf("file://local/%s-index", catalog),
 	)
 	utils.SetCommandOutput(cmd)
+	cmd.Dir = outputDir
 
 	return cmd.Run()
 }
@@ -101,7 +103,7 @@ func Catalogs() error {
 
 		utils.Logger.Infof("Mirroring catalog manifests for %s from %s", catalog, utils.CatalogIndexes[catalog])
 
-		if err := mirrorCatalogs(outputDir, catalog); err != nil {
+		if err := mirrorCatalogManifests(outputDir, catalog); err != nil {
 			return err
 		}
 
@@ -132,7 +134,7 @@ func Catalogs() error {
 
 		utils.Logger.Infof("Mirroring catalog images for %s\n", catalog)
 
-		if err := mirrorImages(outputDir, mappingLocalFiles[0]); err != nil {
+		if err := mirrorCatalogs(outputDir, catalog); err != nil {
 			return err
 		}
 	}
