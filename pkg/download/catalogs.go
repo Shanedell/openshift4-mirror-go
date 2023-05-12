@@ -37,7 +37,7 @@ func mirrorCatalogs(outputDir string, catalog string) error {
 		"--index-filter-by-os", "linux/amd64",
 		"--continue-on-error=true",
 		utils.CatalogIndexes[catalog],
-		fmt.Sprintf("file://local/%s-index", catalog),
+		"file://local",
 	)
 	utils.SetCommandOutput(cmd)
 	cmd.Dir = outputDir
