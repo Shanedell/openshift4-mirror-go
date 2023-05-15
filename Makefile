@@ -97,7 +97,9 @@ ci-release: ci-check clean-dist
 
 .PHONY: ci-check
 ci-check:
-	curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/.github/scripts/ci-check.sh | sh -s
+	ifndef $(CI)
+		$(error "This step should ONLY be run in CI. Exiting...")
+	endif
 
 ## Cleanup targets #################################
 
