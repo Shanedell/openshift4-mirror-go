@@ -97,9 +97,7 @@ ci-release: ci-check clean-dist
 
 .PHONY: ci-check
 ci-check:
-	ifndef $(CI)
-		$(error "This step should ONLY be run in CI. Exiting...")
-	endif
+	[[ -z $$CI ]] && (echo "This step should ONLY be run in CI. Exiting..."; exit 1;) || true
 
 ## Cleanup targets #################################
 
