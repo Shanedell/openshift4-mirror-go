@@ -1,31 +1,12 @@
 package download
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
 )
-
-func mirrorCatalogManifests(outputDir string, catalog string) error {
-	cmd := utils.CreateCommand(
-		filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath),
-		"adm",
-		"catalog",
-		"mirror",
-		"--registry-config", filepath.Join(utils.BundleDir, "pull-secret.json"),
-		"--manifests-only",
-		"--to-manifests", outputDir,
-		utils.CatalogIndexes[catalog],
-		utils.BundleData.TargetRegistry,
-	)
-	utils.SetCommandOutput(cmd)
-
-	return cmd.Run()
-}
 
 func mirrorCatalogs(outputDir string, catalog string) error {
 	cmd := utils.CreateCommand(
@@ -36,6 +17,7 @@ func mirrorCatalogs(outputDir string, catalog string) error {
 		"--registry-config", filepath.Join(utils.BundleDir, "pull-secret.json"),
 		"--index-filter-by-os", "linux/amd64",
 		"--continue-on-error=true",
+		"--to-manifests", outputDir,
 		utils.CatalogIndexes[catalog],
 		"file://local",
 	)
@@ -43,45 +25,6 @@ func mirrorCatalogs(outputDir string, catalog string) error {
 	cmd.Dir = outputDir
 
 	return cmd.Run()
-}
-
-// updates the mapping data to remove registry names and append the index image name to the path
-func updateMappingData(data []byte, dummyRegistryRegexps []*regexp.Regexp) [][]byte {
-	indexImageName := ""
-	for _, d := range strings.Split(string(data), "\n") {
-		if strings.Contains(d, "operator-index") {
-			indexImageName = strings.ReplaceAll(
-				strings.Split(strings.Split(d, "=")[1], ":")[0],
-				fmt.Sprintf("%s/", utils.BundleData.TargetRegistry),
-				"",
-			)
-		} else if strings.Contains(d, "marketplace-index") {
-			indexImageName = strings.ReplaceAll(
-				strings.Split(strings.Split(d, "=")[1], ":")[0],
-				fmt.Sprintf("%s/", utils.BundleData.TargetRegistry),
-				"",
-			)
-		}
-	}
-
-	indexImagePathing := fmt.Sprintf("file://%s/", indexImageName)
-	duplicateIndexImagePathRegexp := regexp.MustCompile(
-		fmt.Sprintf("%s/%s", indexImageName, indexImageName),
-	)
-
-	dataUpdated := [][]byte{
-		dummyRegistryRegexps[0].ReplaceAll(data, []byte(indexImagePathing)),
-		dummyRegistryRegexps[1].ReplaceAll(data, []byte(indexImagePathing)),
-	}
-
-	if indexImageName != "" {
-		dataUpdated = [][]byte{
-			duplicateIndexImagePathRegexp.ReplaceAll(dataUpdated[0], []byte(indexImageName)),
-			duplicateIndexImagePathRegexp.ReplaceAll(dataUpdated[1], []byte(indexImageName)),
-		}
-	}
-
-	return dataUpdated
 }
 
 func Catalogs() error {
@@ -101,40 +44,26 @@ func Catalogs() error {
 			}
 		}
 
-		utils.Logger.Infof("Mirroring catalog manifests for %s from %s", catalog, utils.CatalogIndexes[catalog])
+		utils.Logger.Infof("Mirroring catalogs for %s from %s", catalog, utils.CatalogIndexes[catalog])
 
-		if err := mirrorCatalogManifests(outputDir, catalog); err != nil {
+		if err := mirrorCatalogs(outputDir, catalog); err != nil {
 			return err
 		}
 
 		mappingFilePath := filepath.Join(outputDir, "mapping.txt")
-		mappingLocalFiles := []string{
-			filepath.Join(outputDir, "mapping.local.txt"),
-			filepath.Join(outputDir, "mapping.files.txt"),
-		}
+		mappingLocalFile := filepath.Join(outputDir, "mapping.files.txt")
 
 		data, err := os.ReadFile(mappingFilePath)
 		if err != nil {
 			return err
 		}
 
-		dummyRegistryRegexps := []*regexp.Regexp{
-			regexp.MustCompile(fmt.Sprintf("%s/", utils.BundleData.TargetRegistry)),
-			regexp.MustCompile(fmt.Sprintf(".*%s/", utils.BundleData.TargetRegistry)),
-		}
+		dummyRegistryRegexp := regexp.MustCompile(".*file://")
 
-		dataUpdated := updateMappingData(data, dummyRegistryRegexps)
+		dataUpdated := dummyRegistryRegexp.ReplaceAll(data, []byte("file://"))
 
-		for i, mappingLocalFile := range mappingLocalFiles {
-			err = os.WriteFile(mappingLocalFile, dataUpdated[i], 0644) // nolint:gosec
-			if err != nil {
-				return err
-			}
-		}
-
-		utils.Logger.Infof("Mirroring catalog images for %s\n", catalog)
-
-		if err := mirrorCatalogs(outputDir, catalog); err != nil {
+		err = os.WriteFile(mappingLocalFile, dataUpdated, 0644) // nolint:gosec
+		if err != nil {
 			return err
 		}
 	}
