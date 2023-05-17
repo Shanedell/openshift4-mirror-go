@@ -8,6 +8,24 @@ import (
 	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
 )
 
+// this function is mostly to get the catalog source and image content source policy files
+func mirrorCatalogManifests(outputDir string, catalog string) error {
+	cmd := utils.CreateCommand(
+		filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath),
+		"adm",
+		"catalog",
+		"mirror",
+		"--registry-config", filepath.Join(utils.BundleDir, "pull-secret.json"),
+		"--manifests-only",
+		"--to-manifests", outputDir,
+		utils.CatalogIndexes[catalog],
+		utils.BundleData.TargetRegistry,
+	)
+	utils.SetCommandOutput(cmd)
+
+	return cmd.Run()
+}
+
 func mirrorCatalogs(outputDir string, catalog string) error {
 	cmd := utils.CreateCommand(
 		filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath),
@@ -45,6 +63,10 @@ func Catalogs() error {
 		}
 
 		utils.Logger.Infof("Mirroring catalogs for %s from %s", catalog, utils.CatalogIndexes[catalog])
+
+		if err := mirrorCatalogManifests(outputDir, catalog); err != nil {
+			return err
+		}
 
 		if err := mirrorCatalogs(outputDir, catalog); err != nil {
 			return err
