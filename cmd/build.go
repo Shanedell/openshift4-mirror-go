@@ -3,8 +3,8 @@ package cmd
 import (
 	"errors"
 
-	"github.com/Shanedell/openshift4-mirror-go/pkg/app"
-	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
+	"github.com/shanedell/openshift4-mirror-go/pkg/app"
+	"github.com/shanedell/openshift4-mirror-go/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

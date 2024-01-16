@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
+	"github.com/shanedell/openshift4-mirror-go/pkg/utils"
 )
 
 // this function is mostly to get the catalog source and image content source policy files

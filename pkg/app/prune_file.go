@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
+	"github.com/shanedell/openshift4-mirror-go/pkg/utils"
 )
 
 func createIndexFile(imageToPrune string, osName string, jqArgs string, prunedCatalogIndexFile string) error {
@@ -41,7 +41,7 @@ func createDockerFile(containerRuntimePath string, osName string, prunedCatalogF
 	return runOpmCommand(cmd, osName, containerRuntimePath, true)
 }
 
-func buildImage(imageName string, containerRuntime string, containerRuntimePath string, osName string) error {
+func buildImage(imageName string, containerRuntime string, containerRuntimePath string, osName string, prunedCatalogFolder string) error {
 	cmd := utils.CreateCommand(
 		containerRuntime,
 		"build",
@@ -49,13 +49,13 @@ func buildImage(imageName string, containerRuntime string, containerRuntimePath 
 		"-f", "configs.Dockerfile",
 		".",
 	)
-	cmd.Dir = "pruned-catalog"
+	cmd.Dir = prunedCatalogFolder
 
 	return runOpmCommand(cmd, osName, containerRuntimePath, true)
 }
 
 func pruneFile(pruneData *utils.PruneDataType, containerRuntime string, containerRuntimePath string, osName string) error {
-	prunedCatalogFolder := "pruned-catalog/configs"
+	prunedCatalogFolder := fmt.Sprintf("%s/configs", pruneData.FolderName)
 	prunedCatalogIndexFile := fmt.Sprintf("%s/index.json", prunedCatalogFolder)
 
 	jqArgs := ""
@@ -92,7 +92,7 @@ func pruneFile(pruneData *utils.PruneDataType, containerRuntime string, containe
 	utils.Logger.Info("Finished creating dockerfile...")
 
 	utils.Logger.Infof("Building image %s...\n", pruneData.TargetImage)
-	err = buildImage(pruneData.TargetImage, containerRuntime, containerRuntimePath, osName)
+	err = buildImage(pruneData.TargetImage, containerRuntime, containerRuntimePath, osName, pruneData.FolderName)
 	if err != nil {
 		return err
 	}

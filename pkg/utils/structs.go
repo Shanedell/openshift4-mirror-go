@@ -41,4 +41,5 @@ type PruneDataType struct {
 	OpmVersion   string
 	PruneType    string
 	TargetImage  string
+	FolderName   string
 }

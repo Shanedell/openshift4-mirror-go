@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Shanedell/openshift4-mirror-go/pkg/download"
-	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
+	"github.com/shanedell/openshift4-mirror-go/pkg/download"
+	"github.com/shanedell/openshift4-mirror-go/pkg/utils"
 )
 
 func Bundle(bundleDataIn *utils.BundleDataType) error {

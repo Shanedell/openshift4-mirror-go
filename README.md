@@ -2,7 +2,7 @@
 
 This is a Golang implementation of [openshift4-mirror](https://repo1.dso.mil/platform-one/distros/red-hat/ocp4/openshift4-mirror). The purpose behind this was to make distribution easier.
 
-Executable files can be downloaded from the [releases page](https://github.com/Shanedell/openshift4-mirror-go/releases). Also a docker image ghcr.io/shanedell/openshift4-mirror-go.
+Executable files can be downloaded from the [releases page](https://github.com/shanedell/openshift4-mirror-go/releases). Also a docker image ghcr.io/shanedell/openshift4-mirror-go.
 
 ## Options
 

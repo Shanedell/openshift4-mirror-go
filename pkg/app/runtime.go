@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
+	"github.com/shanedell/openshift4-mirror-go/pkg/utils"
 )
 
 func GetContainerRuntime() string {

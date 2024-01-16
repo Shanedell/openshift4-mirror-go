@@ -3,8 +3,8 @@ package cmd
 import (
 	"errors"
 
-	"github.com/Shanedell/openshift4-mirror-go/pkg/app"
-	"github.com/Shanedell/openshift4-mirror-go/pkg/utils"
+	"github.com/shanedell/openshift4-mirror-go/pkg/app"
+	"github.com/shanedell/openshift4-mirror-go/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +14,7 @@ var (
 	pruneType    string
 	opmVersion   string
 	targetImage  string
+	folderName   string
 )
 
 var pruneHelp = "prune the Red Hat Operator index image"
@@ -68,6 +69,14 @@ func NewPruneCommand() *cobra.Command {
 		"complete image name to tag final image as.",
 	)
 
+	pruneCommand.PersistentFlags().StringVarP(
+		&folderName,
+		"folder-name",
+		"f",
+		"pruned-catalog",
+		"folder name for the pruned catalog",
+	)
+
 	return pruneCommand
 }
 
@@ -92,6 +101,7 @@ func pruneMain(_ *cobra.Command, _ []string) error {
 		PruneType:    pruneType,
 		OpmVersion:   opmVersion,
 		TargetImage:  targetImage,
+		FolderName:   folderName,
 	}
 
 	return app.PruneIndexImage(

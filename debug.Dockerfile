@@ -15,7 +15,7 @@ ENV LANGUAGE=en_US.UTF-8
 LABEL \
     name="openshift4-mirror-go" \
     description="Utility for mirroring OpenShift 4 content" \
-    maintainer="Shanedell"
+    maintainer="shanedell"
 
 USER root
 

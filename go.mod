@@ -1,4 +1,4 @@
-module github.com/Shanedell/openshift4-mirror-go
+module github.com/shanedell/openshift4-mirror-go
 
 go 1.18
 
