@@ -42,4 +42,5 @@ type PruneDataType struct {
 	PruneType    string
 	TargetImage  string
 	FolderName   string
+	UseAlpha     bool
 }

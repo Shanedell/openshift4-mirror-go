@@ -30,14 +30,26 @@ func createIndexFile(imageToPrune string, osName string, jqArgs string, prunedCa
 	return nil
 }
 
-func createDockerFile(containerRuntimePath string, osName string, prunedCatalogFolder string) error {
-	cmd := utils.CreateCommand(
-		filepath.Join(utils.BundleDirs.Bin, "opm"),
-		"alpha",
-		"generate",
-		"dockerfile",
-		prunedCatalogFolder,
-	)
+func createDockerFile(containerRuntimePath string, osName string, prunedCatalogFolder string, useAlpha bool) error {
+	var params []string
+
+	if useAlpha {
+		params = []string{
+			"alpha",
+			"generate",
+			"dockerfile",
+			prunedCatalogFolder,
+		}
+	} else {
+		params = []string{
+			"generate",
+			"dockerfile",
+			prunedCatalogFolder,
+		}
+	}
+
+	cmd := utils.CreateCommand(filepath.Join(utils.BundleDirs.Bin, "opm"), params...)
+
 	return runOpmCommand(cmd, osName, containerRuntimePath, true)
 }
 
@@ -85,7 +97,8 @@ func pruneFile(pruneData *utils.PruneDataType, containerRuntime string, containe
 	utils.Logger.Info("Finished creating index file...")
 
 	utils.Logger.Info("Creating dockerfile...")
-	err = createDockerFile(containerRuntimePath, osName, prunedCatalogFolder)
+
+	err = createDockerFile(containerRuntimePath, osName, prunedCatalogFolder, pruneData.UseAlpha)
 	if err != nil {
 		return err
 	}

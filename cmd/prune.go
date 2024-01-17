@@ -15,6 +15,7 @@ var (
 	opmVersion   string
 	targetImage  string
 	folderName   string
+	useAlpha     bool
 )
 
 var pruneHelp = "prune the Red Hat Operator index image"
@@ -77,6 +78,13 @@ func NewPruneCommand() *cobra.Command {
 		"folder name for the pruned catalog",
 	)
 
+	pruneCommand.PersistentFlags().BoolVar(
+		&useAlpha,
+		"use-alpha",
+		false,
+		"use opm alpha to generate dockerfile instead of opm generate",
+	)
+
 	return pruneCommand
 }
 
@@ -102,6 +110,7 @@ func pruneMain(_ *cobra.Command, _ []string) error {
 		OpmVersion:   opmVersion,
 		TargetImage:  targetImage,
 		FolderName:   folderName,
+		UseAlpha:     useAlpha,
 	}
 
 	return app.PruneIndexImage(
