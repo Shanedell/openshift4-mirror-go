@@ -40,9 +40,7 @@ Flags:
   -c, --containerRuntime string       container runtime. supported options [docker, podman]. if not specified, code looks for both and uses whichever is found first.
       --containerRuntimePath string   full to container runtime. needed if executable not in /usr/bin or /usr/local/bin
   -h, --help                          help for openshift4_mirror
-  -v, --openshift-version string      the OpenShift version (e.g. 4.5.11)
       --pre-release                   pre-release version of OpenShift
-      --pull-secret string            the content of your pull secret (can be found at https://cloud.redhat.com/openshift/install/pull-secret)
   -r, --target-registry string        target registry to tag the image with (default "example.registry.com")
 
 Use "openshift4_mirror [command] --help" for more information about a command.
@@ -51,6 +49,7 @@ Use "openshift4_mirror [command] --help" for more information about a command.
 **Build Usage:**
 
 ```bash
+build the container image
 
 Usage:
   openshift4_mirror build [flags]
@@ -62,9 +61,7 @@ Global Flags:
       --bundle-dir string             directory to save downloaded content
   -c, --containerRuntime string       container runtime. supported options [docker, podman]. if not specified, code looks for both and uses whichever is found first.
       --containerRuntimePath string   full to container runtime. needed if executable not in /usr/bin or /usr/local/bin
-  -v, --openshift-version string      the OpenShift version (e.g. 4.5.11)
       --pre-release                   pre-release version of OpenShift
-      --pull-secret string            the content of your pull secret (can be found at https://cloud.redhat.com/openshift/install/pull-secret)
   -r, --target-registry string        target registry to tag the image with (default "example.registry.com")
 ```
 
@@ -83,9 +80,7 @@ Global Flags:
       --bundle-dir string             directory to save downloaded content
   -c, --containerRuntime string       container runtime. supported options [docker, podman]. if not specified, code looks for both and uses whichever is found first.
       --containerRuntimePath string   full to container runtime. needed if executable not in /usr/bin or /usr/local/bin
-  -v, --openshift-version string      the OpenShift version (e.g. 4.5.11)
       --pre-release                   pre-release version of OpenShift
-      --pull-secret string            the content of your pull secret (can be found at https://cloud.redhat.com/openshift/install/pull-secret)
   -r, --target-registry string        target registry to tag the image with (default "example.registry.com")
 ```
 
@@ -98,22 +93,26 @@ Usage:
   openshift4_mirror bundle [flags]
 
 Flags:
-      --catalog-version string   version of images to use for catalogs
-      --catalogs strings         the catalog(s) content to download. catalogs: [redhat-operators, certified-operators, redhat-marketplace, community-operators]. defaults to all
-  -h, --help                     help for bundle
-      --platform string          target platform for install. platforms: [aws, azure, gcp, metal, openstack, vmware]
-      --skip-catalogs            skip downloading of catalog content
-      --skip-existing            skip downloading content that already exists on disk (default true)
-      --skip-release             skip downloading of release content
-      --skip-rhcos               skip downloading of RHCOS image
+      --catalog-version string                  version of images to use for catalogs
+      --catalogs strings                        the catalog(s) content to download. catalogs: [redhat-operators, certified-operators, redhat-marketplace, community-operators]. defaults to all
+      --certified-operator-index-image string   version of image to use for certified-operator catalogs
+      --community-operator-index-image string   version of image to use for community-operator catalogs
+  -h, --help                                    help for bundle
+  -v, --openshift-version string                the OpenShift version (e.g. 4.5.11)
+      --platform string                         target platform for install. platforms: [aws, azure, gcp, metal, openstack, vmware]
+      --pull-secret string                      the content of your pull secret (can be found at https://cloud.redhat.com/openshift/install/pull-secret)
+      --redhat-marketplace-index-image string   version of image to use for redhat-marketplace catalogs
+      --redhat-operator-index-image string      version of image to use for redhat-operator catalogs
+      --skip-catalogs                           skip downloading of catalog content
+      --skip-existing                           skip downloading content that already exists on disk (default true)
+      --skip-release                            skip downloading of release content
+      --skip-rhcos                              skip downloading of RHCOS image
 
 Global Flags:
       --bundle-dir string             directory to save downloaded content
   -c, --containerRuntime string       container runtime. supported options [docker, podman]. if not specified, code looks for both and uses whichever is found first.
       --containerRuntimePath string   full to container runtime. needed if executable not in /usr/bin or /usr/local/bin
-  -v, --openshift-version string      the OpenShift version (e.g. 4.5.11)
       --pre-release                   pre-release version of OpenShift
-      --pull-secret string            the content of your pull secret (can be found at https://cloud.redhat.com/openshift/install/pull-secret)
   -r, --target-registry string        target registry to tag the image with (default "example.registry.com")
 ```
 
@@ -126,17 +125,19 @@ Usage:
   openshift4_mirror prune [flags]
 
 Flags:
-  -h, --help                help for prune
-  -n, --namespace string    full path of tagged image (default "redhat")
-  -o, --operators strings   the operator(s) desired. Rest are pruned out
-  -t, --tag string          version tag for image (default "latest")
+  -f, --folder-name string    folder name for the pruned catalog (default "pruned-catalog")
+  -h, --help                  help for prune
+  -o, --operators strings     the operator(s) desired. Rest are pruned out
+      --opm-version string    version of opm to download/use (default "latest-4.9")
+      --prune-image string    image to prune (default "registry.redhat.io/redhat/redhat-operator-index:v4.10")
+  -t, --target-image string   complete image name to tag final image as. (default "example.com/redhat-operators-index:latest")
+      --type string           index image prunnings type. supported options: [sqlite, file] (default "sqlite")
+      --use-alpha             use opm alpha to generate dockerfile instead of opm generate
 
 Global Flags:
       --bundle-dir string             directory to save downloaded content
   -c, --containerRuntime string       container runtime. supported options [docker, podman]. if not specified, code looks for both and uses whichever is found first.
       --containerRuntimePath string   full to container runtime. needed if executable not in /usr/bin or /usr/local/bin
-  -v, --openshift-version string      the OpenShift version (e.g. 4.5.11)
       --pre-release                   pre-release version of OpenShift
-      --pull-secret string            the content of your pull secret (can be found at https://cloud.redhat.com/openshift/install/pull-secret)
   -r, --target-registry string        target registry to tag the image with (default "example.registry.com")
 ```
