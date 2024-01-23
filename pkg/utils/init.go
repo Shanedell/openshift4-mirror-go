@@ -1,18 +1,11 @@
 package utils
 
 import (
-	"fmt"
 	"path/filepath"
-	"strings"
 )
 
 func Initialize(bundleDataIn *BundleDataType) error {
 	BundleData = bundleDataIn
-
-	versionMinor := BundleData.OpenshiftVersion
-	if !strings.Contains(BundleData.OpenshiftVersion, "latest-") {
-		versionMinor = GetVersionMinor(BundleData.OpenshiftVersion)
-	}
 
 	if BundleData.BundleDir != "" {
 		BundleDir = filepath.Join(Cwd, BundleData.BundleDir, BundleData.OpenshiftVersion)
@@ -28,14 +21,10 @@ func Initialize(bundleDataIn *BundleDataType) error {
 	}
 
 	CatalogIndexes = map[string]string{
-		"redhat-operators": BundleData.RedhatOperatorIndexImage,
-		"certified-operators": fmt.Sprintf(
-			"registry.redhat.io/redhat/certified-operator-index:v%s", versionMinor,
-		),
-		"redhat-marketplace": fmt.Sprintf(
-			"registry.redhat.io/redhat/redhat-marketplace-index:v%s", versionMinor,
-		),
-		"community-operators": "registry.redhat.io/redhat/community-operator-index:latest",
+		"redhat-operators":    BundleData.RedhatOperatorIndexImage,
+		"redhat-marketplace":  BundleData.RedhatMarketplaceIndexImage,
+		"certified-operators": BundleData.CertifiedOperatorIndexImage,
+		"community-operators": BundleData.CommunityOperatorIndexImage,
 	}
 
 	if err := CreateBundlesDir(); err != nil {

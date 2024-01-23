@@ -9,16 +9,19 @@ import (
 )
 
 var (
-	openshiftVersion         string
-	pullSecret               string
-	platform                 string
-	redhatOperatorIndexImage string
-	catalogVersion           string
-	catalogs                 []string
-	skipExisting             bool
-	skipRelease              bool
-	skipCatalogs             bool
-	skipRhcos                bool
+	openshiftVersion            string
+	pullSecret                  string
+	platform                    string
+	redhatOperatorIndexImage    string
+	redhatMarketplaceIndexImage string
+	certifiedOperatorIndexImage string
+	communityOperatorIndexImage string
+	catalogVersion              string
+	catalogs                    []string
+	skipExisting                bool
+	skipRelease                 bool
+	skipCatalogs                bool
+	skipRhcos                   bool
 )
 
 var bundleHelp = "bundle the OpenShift content"
@@ -47,6 +50,33 @@ func addBundleSkipFlags(cmd *cobra.Command) {
 		"skip-rhcos",
 		false,
 		"skip downloading of RHCOS image",
+	)
+}
+
+func addIndexImageFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringVar(
+		&redhatOperatorIndexImage,
+		"redhat-operator-index-image",
+		"",
+		"version of image to use for redhat-operator catalogs",
+	)
+	cmd.PersistentFlags().StringVar(
+		&redhatMarketplaceIndexImage,
+		"redhat-marketplace-index-image",
+		"",
+		"version of image to use for redhat-marketplace catalogs",
+	)
+	cmd.PersistentFlags().StringVar(
+		&certifiedOperatorIndexImage,
+		"certified-operator-index-image",
+		"",
+		"version of image to use for certified-operator catalogs",
+	)
+	cmd.PersistentFlags().StringVar(
+		&communityOperatorIndexImage,
+		"community-operator-index-image",
+		"",
+		"version of image to use for community-operator catalogs",
 	)
 }
 
@@ -104,14 +134,9 @@ func NewBundleCommand() *cobra.Command {
 		"",
 		"version of images to use for catalogs",
 	)
-	addBundleSkipFlags(bundleCommand)
 
-	bundleCommand.PersistentFlags().StringVar(
-		&redhatOperatorIndexImage,
-		"redhat-operator-index-image",
-		"",
-		"version of images to use for catalogs",
-	)
+	addBundleSkipFlags(bundleCommand)
+	addIndexImageFlags(bundleCommand)
 
 	return bundleCommand
 }
@@ -167,27 +192,49 @@ func bundleMain(_ *cobra.Command, _ []string) error {
 		catalogVersion = openshiftVersion
 	}
 
+	versionMinor := utils.GetVersionMinor(openshiftVersion)
+
 	if redhatOperatorIndexImage == "" {
-		versionMinor := utils.GetVersionMinor(openshiftVersion)
 		redhatOperatorIndexImage = fmt.Sprintf(
 			"registry.redhat.io/redhat/redhat-operator-index:v%s", versionMinor,
 		)
 	}
 
+	if redhatMarketplaceIndexImage == "" {
+		redhatMarketplaceIndexImage = fmt.Sprintf(
+			"registry.redhat.io/redhat/redhat-marketplace-index:v%s", versionMinor,
+		)
+	}
+
+	if certifiedOperatorIndexImage == "" {
+		certifiedOperatorIndexImage = fmt.Sprintf(
+			"registry.redhat.io/redhat/certified-operator-index:v%s", versionMinor,
+		)
+	}
+
+	if communityOperatorIndexImage == "" {
+		communityOperatorIndexImage = fmt.Sprintf(
+			"registry.redhat.io/redhat/community-operator-index:v%s", versionMinor,
+		)
+	}
+
 	bundleData := &utils.BundleDataType{
-		BundleDir:                bundleDir,
-		CatalogVersion:           catalogVersion,
-		Catalogs:                 catalogs,
-		Platform:                 platform,
-		PreRelease:               preRelease,
-		PullSecret:               pullSecret,
-		OpenshiftVersion:         openshiftVersion,
-		RedhatOperatorIndexImage: redhatOperatorIndexImage,
-		SkipExisting:             skipExisting,
-		SkipRelease:              skipRelease,
-		SkipCatalogs:             skipCatalogs,
-		SkipRhcos:                skipRhcos,
-		TargetRegistry:           targetRegistry,
+		BundleDir:                   bundleDir,
+		CatalogVersion:              catalogVersion,
+		Catalogs:                    catalogs,
+		Platform:                    platform,
+		PreRelease:                  preRelease,
+		PullSecret:                  pullSecret,
+		OpenshiftVersion:            openshiftVersion,
+		RedhatOperatorIndexImage:    redhatOperatorIndexImage,
+		RedhatMarketplaceIndexImage: redhatMarketplaceIndexImage,
+		CertifiedOperatorIndexImage: certifiedOperatorIndexImage,
+		CommunityOperatorIndexImage: communityOperatorIndexImage,
+		SkipExisting:                skipExisting,
+		SkipRelease:                 skipRelease,
+		SkipCatalogs:                skipCatalogs,
+		SkipRhcos:                   skipRhcos,
+		TargetRegistry:              targetRegistry,
 	}
 
 	return app.Bundle(bundleData)

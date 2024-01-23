@@ -1,19 +1,22 @@
 package utils
 
 type BundleDataType struct {
-	BundleDir                string
-	CatalogVersion           string
-	Catalogs                 []string
-	OpenshiftVersion         string
-	Platform                 string
-	PreRelease               bool
-	PullSecret               string
-	RedhatOperatorIndexImage string
-	SkipExisting             bool
-	SkipRelease              bool
-	SkipCatalogs             bool
-	SkipRhcos                bool
-	TargetRegistry           string
+	BundleDir                   string
+	CatalogVersion              string
+	Catalogs                    []string
+	OpenshiftVersion            string
+	Platform                    string
+	PreRelease                  bool
+	PullSecret                  string
+	RedhatOperatorIndexImage    string
+	RedhatMarketplaceIndexImage string
+	CertifiedOperatorIndexImage string
+	CommunityOperatorIndexImage string
+	SkipExisting                bool
+	SkipRelease                 bool
+	SkipCatalogs                bool
+	SkipRhcos                   bool
+	TargetRegistry              string
 }
 
 type BundleDirsType struct {
