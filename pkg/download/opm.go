@@ -18,18 +18,6 @@ func OpmScript(osName string, version string) error {
 		"/",
 	)
 
-	if utils.BundleData.PreRelease {
-		versionSplit := strings.Split(version, ".")
-		downloadVersion := strings.Join(versionSplit[0:2], ".")
-		downloadURL = strings.Join(
-			[]string{
-				utils.RhcosPreBaseURL,
-				fmt.Sprintf("latest-%s", downloadVersion), filename,
-			},
-			"/",
-		)
-	}
-
 	outputPath := filepath.Join(utils.BundleDirs.Clients, filename)
 
 	if err := utils.DownloadFile(downloadURL, outputPath); err != nil {
