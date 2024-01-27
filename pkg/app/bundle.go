@@ -62,7 +62,7 @@ func Bundle(bundleDataIn *utils.BundleDataType) error {
 		}
 
 		if err := os.WriteFile(
-			filepath.Join(utils.BundleDirs.Bin, "oc"),
+			filepath.Join(utils.BundleDirs.Bin, "kubectl"),
 			ocFileData,
 			os.ModePerm,
 		); err != nil {
