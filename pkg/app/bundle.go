@@ -47,9 +47,28 @@ func Bundle(bundleDataIn *utils.BundleDataType) error {
 
 	if localOSTarball != "openshift-client-linux.tar.gz" {
 		os.Remove(localOSTarball)
-	}
+		os.Remove(filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath))
+	} else {
+		if err := os.Rename(
+			filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath),
+			filepath.Join(utils.BundleDirs.Bin, "oc"),
+		); err != nil {
+			return err
+		}
 
-	os.Remove(filepath.Join(utils.BundleDirs.Bin, utils.OCLocalCmdPath))
+		ocFileData, err := os.ReadFile(filepath.Join(utils.BundleDirs.Bin, "oc"))
+		if err != nil {
+			return err
+		}
+
+		if err := os.WriteFile(
+			filepath.Join(utils.BundleDirs.Bin, "oc"),
+			ocFileData,
+			os.ModePerm,
+		); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
