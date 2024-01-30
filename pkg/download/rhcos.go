@@ -39,8 +39,9 @@ func Rhcos() error {
 		return err
 	}
 
+	versionMinor := utils.GetVersionMinor(utils.BundleData.OpenshiftVersion)
 	downloadURL := strings.Join(
-		[]string{utils.RhcosBaseURL, utils.BundleData.OpenshiftVersion, "latest", filename},
+		[]string{utils.RhcosBaseURL, versionMinor, "latest", filename},
 		"/",
 	)
 
