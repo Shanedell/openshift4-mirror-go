@@ -18,7 +18,7 @@ var (
 	useAlpha     bool
 )
 
-var pruneHelp = "prune the Red Hat Operator index image"
+var pruneHelp = "prune operator index image"
 
 func NewPruneCommand() *cobra.Command {
 	pruneCommand := &cobra.Command{

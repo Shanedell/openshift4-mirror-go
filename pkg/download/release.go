@@ -19,6 +19,7 @@ func Release() error {
 			"adm",
 			"release",
 			"mirror",
+			"--print-mirror-instructions", "idms",
 			"--registry-config", filepath.Join(utils.BundleDir, "pull-secret.json"),
 			"--to-dir", utils.BundleDirs.Release,
 			utils.BundleData.OpenshiftVersion,
